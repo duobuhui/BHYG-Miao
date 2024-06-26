@@ -93,51 +93,51 @@ def run(hyg):
             status, clickable = hyg.get_ticket_status()
             if status == 2 or clickable:
                 if status == 1:
-                    logger.warning("未开放购票")
+                    logger.warning("喵，现在还不能买票呢喵~要不晚点再回来看看喵？")
                 elif status == 3:
-                    logger.warning("已停售")
+                    logger.warning("票已经卖完了喵")
                 elif status == 5:
-                    logger.warning("不可售")
+                    logger.warning("现在是不可售喵，也许过会儿就会公布了喵！")
                 elif status == 102:
-                    logger.warning("已结束")
+                    logger.warning("这个演出已经卖完票了，主人好像来晚了喵...")
                 while True:
                     if hyg.try_create_order():
                         if "hunter" not in hyg.config:
                             hyg.sdk.capture_message("Pay success!")
-                            logger.success("购票成功！")
+                            logger.success("入场券GET☆DAZE")
                             return
                         else:
                             hyg.config['hunter'] += 1
                             save(hyg.config)
-                            logger.success(f"猎手，你的战绩：{hyg.config['hunter']}张")
+                            logger.success(f"主人，你也就抢了区区{hyg.config['hunter']}张票喵")
                 break
             elif status == 1:
-                logger.warning("未开放购票")
+                logger.warning("喵，现在还不能买票呢喵~要不晚点再回来看看喵？")
             elif status == 3:
-                logger.warning("已停售")
+                logger.warning("票已经卖完了喵")
             elif status == 4:
-                logger.warning("已售罄")
+                logger.warning("票已经卖完了喵")
             elif status == 5:
-                logger.warning("不可售")
+                logger.warning("现在是不可售喵，也许过会儿就会公布了喵！")
             elif status == 6:
-                logger.error("免费票，程序尚未适配")
+                logger.error("这张票好像是免费的喵，还用得着本喵出场吗喵~")
                 sentry_sdk.capture_message("Exit by in-app exit")
                 return
             elif status == 8:
-                logger.warning("暂时售罄，即将放票")
+                logger.warning("看上去没票了喵...但是本喵闻到了余票的味道~")
 
             elif status == -1:
                 continue
             else:
-                logger.error("未知状态:" + str(status))
+                logger.error("本喵发现了一条主人没告诉我的状态喵...B站告诉我是这个" + str(status))
             time.sleep(hyg.config["status_delay"])
     elif hyg.config["mode"] == 'time':
-        logger.info("当前为定时抢票模式")
-        logger.info("等待到达开票时间...")
+        logger.info("根据主人的设定，现在是定时抢票模式喵！")
+        logger.info("本喵会帮你看着的喵...")
         while hyg.get_time() < hyg.config["time"]-60:
             time.sleep(10)
-            logger.info(f"等待中，距离开票时间还有{hyg.config['time'] - get_time():.2f}秒")
-        logger.info("唤醒！即将开始抢票！")# Heads up, the wheels are spinning...
+            logger.info(f"好困...怎么还有{hyg.config['time'] - get_time():.2f}秒啊喵呜..")
+        logger.info("本喵闻到了票的味道！马上开始喵！")# Heads up, the wheels are spinning...
         while True:
             if hyg.get_time() >= hyg.config["time"]:
                 break
@@ -145,12 +145,12 @@ def run(hyg):
             if hyg.try_create_order():
                 if "hunter" not in hyg.config:
                     hyg.sdk.capture_message("Pay success!")
-                    logger.success("购票成功！")
+                    logger.success("入场券GET☆DAZE")
                     return
                 else:
                     hyg.config['hunter'] += 1
                     save(hyg.config)
-                    logger.success(f"猎手，你的战绩：{hyg.config['hunter']}张")
+                    logger.success(f"主人，你也就抢了区区{hyg.config['hunter']}张票喵")
 
 
 def main():
@@ -278,12 +278,12 @@ def main():
             config["is_paper_ticket"] = response["data"]["has_paper_ticket"]
             screens = response["data"]["screen_list"]
             screen_id = prompt([
-                inquirer.List("screen_id", message="请选择场次", choices=[f"{i}. {screens[i]['name']}" for i in range(len(screens))])
+                inquirer.List("screen_id", message="请告诉本喵你要去哪一天喵", choices=[f"{i}. {screens[i]['name']}" for i in range(len(screens))])
             ])["screen_id"].split(".")[0]
             logger.info("场次：" + screens[int(screen_id)]["name"])
             tickets = screens[int(screen_id)]["ticket_list"]  # type: ignore
             sku_id = prompt([
-                inquirer.List("sku_id", message="请选择票档", choices=[f"{i}. {tickets[i]['desc']} {tickets[i]['price']/100}元" for i in range(len(tickets))])
+                inquirer.List("sku_id", message="请告诉本喵你有多少钱喵", choices=[f"{i}. {tickets[i]['desc']} {tickets[i]['price']/100}元" for i in range(len(tickets))])
             ])["sku_id"].split(".")[0]
             logger.info("票档：" + tickets[int(sku_id)]["desc"])
             config["screen_id"] = str(screens[int(screen_id)]["id"])
@@ -292,7 +292,7 @@ def main():
             config["ticket_desc"] = str(tickets[int(sku_id)]["desc"])
             config["time"] = int(tickets[int(sku_id)]["saleStart"])
             if tickets[int(sku_id)]["discount_act"] is not None:
-                logger.info(f"已开启优惠活动：活动ID {tickets[int(sku_id)]["discount_act"]["act_id"]}")
+                logger.info(f"这个活动好像有优惠喵！ID {tickets[int(sku_id)]['discount_act']['act_id']}")
                 config["act_id"] = tickets[int(sku_id)]["discount_act"]["act_id"]
                 config["order_type"] = tickets[int(sku_id)]["discount_act"]["act_type"]
             else:
@@ -315,10 +315,10 @@ def main():
                         session.close()
                 addr_list = resp_ticket.json()["data"]["addr_list"]
                 if len(addr_list) == 0:
-                    logger.error("没有收货地址，请先添加收货地址")
+                    logger.error("本喵还不知道你住在哪里呢喵，打开B站添加一个喵！")
                 else:
                     addr = prompt([
-                        inquirer.List("addr", message="请选择收货地址", choices=[{"name": f"{i}. {addr_list[i]['prov']+addr_list[i]['city']+addr_list[i]['area']+addr_list[i]['addr']} {addr_list[i]['name']} {addr_list[i]['phone']}", "value": i} for i in range(len(addr_list))])
+                        inquirer.List("addr", message="告诉本喵你的地址喵", choices=[{"name": f"{i}. {addr_list[i]['prov']+addr_list[i]['city']+addr_list[i]['area']+addr_list[i]['addr']} {addr_list[i]['name']} {addr_list[i]['phone']}", "value": i} for i in range(len(addr_list))])
                     ])["addr"].split(".")[0]
                     addr = addr_list[int(addr)]
                     logger.info(
@@ -353,11 +353,11 @@ def main():
             buyer_infos = response.json()["data"]["list"]
             config["buyer_info"] = []
             if len(buyer_infos) == 0:
-                logger.error("未找到购票人，请前往实名添加购票人")
+                logger.error("主人的信息也要瞒着我吗？打开B站添加一下喵~")
             else:
                 multiselect = True
             if config["id_bind"] == 1:
-                logger.info("本项目只能购买一人票")
+                logger.info("这个漫展只能一个人去喵...")
                 multiselect = False
             if multiselect:
                 buyerids = prompt([
@@ -386,16 +386,16 @@ def main():
                         male = True
                 if easter_egg:
                     if len(buyerids) == 1:
-                        logger.info("单身是这样的🤣不会吧不会吧，不会真有人一个人去逛漫展吧")
+                        logger.info("你好像只有一个人喵，好孤单喵")
                     else:
                         if male and female:
-                            logger.error("小情侣不得house😡")
+                            logger.error("主人是和对象一起去的吗喵？不要抛弃本喵喵...")
                         elif male and not female:
-                            logger.error("我朝，有南通啊！")
+                            logger.error("喵！主人是南通吗？")
                             if len(buyerids) == 4:
-                                logger.error("我朝，开impart啊！")
+                                logger.error("喵喵喵！？这么多人陪主人去看漫展喵？")
                         elif female and not male:
-                            logger.error("我朝，有女同啊！")
+                            logger.error("喵！主人是女铜吗？")
             else:
                 index = prompt([
                     inquirer.List("index", message="请选择购票人", choices=[f"{i}. {buyer_infos[i]['name']} {buyer_infos[i]['personal_id']} {buyer_infos[i]['tel']}" for i in range(len(buyer_infos))])
@@ -408,7 +408,7 @@ def main():
         if config["id_bind"] == 0 and (
             "buyer" not in config or "tel" not in config
         ):
-            logger.info("请添加联系人信息")
+            logger.info("请告诉本喵主人的信息喵！")
             config["buyer"] = input("联系人姓名：")
             config["tel"] = prompt([
                 inquirer.Text("tel", message="联系人手机号", validate=lambda _, x: len(x) == 11)
@@ -445,12 +445,12 @@ def main():
         BHYG = BilibiliHyg(config, sentry_sdk, kdl_client, session)
         run(BHYG)
     except KeyboardInterrupt:
-        logger.info("已手动退出")
+        logger.info("你手动打断了本喵的工作喵，本喵会记住你的喵")
         return
     except Exception as e:
         track = sentry_sdk.capture_exception(e)
-        logger.exception("程序出现错误，错误信息：" + str(e))
-        logger.error("错误追踪ID(可提供给开发者)：" + str(track))
+        logger.exception("本喵出现错误了喵...：" + str(e))
+        logger.error("虽然不懂错误追踪ID是什么喵，但是开发者说可以提供给他喵：" + str(track))
         return
     return
 
@@ -459,12 +459,12 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        logger.info("已手动退出")
+        logger.info("你手动打断了本喵的工作喵，本喵会记住你的喵")
     from sentry_sdk import Hub
     client = Hub.current.client
     if client is not None:
         client.close(timeout=2.0)
-    logger.info("已安全退出，您可以关闭窗口（将在15秒后自动关闭）")
+    logger.info("算了喵，主人可以关闭窗口了喵（或者本喵会在15秒后自动退下的喵）")
     try:
         time.sleep(15)
     except KeyboardInterrupt:

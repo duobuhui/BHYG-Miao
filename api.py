@@ -42,9 +42,9 @@ def load() -> dict:
         data = unpad(cipher.decrypt(cipher_text), AES.block_size).decode("utf-8")
         data = json.loads(data)
     except ValueError:
-        logger.error("数据错误，运行环境不符")
+        logger.error("有问题喵！本喵正在删除错误的数据文件喵！")
         if os.path.exists("share.json"):
-            logger.info("检测到分享文件，正在迁移")
+            logger.info("本喵好像找到了一个分享文件喵，正在恢复数据喵！")
             with open("share.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
                 save(data)
@@ -53,7 +53,7 @@ def load() -> dict:
         else:
             data = {}
             os.remove("data")
-        logger.info("已销毁原数据")
+        logger.info("原数据文件已删除喵！")
     return data
 
 class BilibiliHyg:
@@ -82,14 +82,14 @@ class BilibiliHyg:
         if self.client != None:
             self.ip = self.client.tps_current_ip(sign_type="hmacsha1")
         if self.config["mode"] == 'time':
-            logger.info("当前为定时抢票模式")
-            logger.info("等待到达开票时间前15分钟以获取token...")
+            logger.info("根据主人的设定，现在是定时抢票模式喵！")
+            logger.info("本喵会在开票时间的前15分钟开始准备token喵！")
             while self.get_time() < self.config["time"]-900:
                 time.sleep(10)
-                logger.info(f"距离开票时间还有{(self.config["time"]-self.get_time()):.2f}秒")
-        logger.info("准备完毕，获取token中...")
+                logger.info(f"好困...怎么还有{(self.config['time']-self.get_time()):.2f}秒啊喵呜..")
+        logger.info("准备完毕了喵！正在获取token喵！")
         self.token = self.get_token()
-        logger.info("即将开始下单")
+        logger.info("本喵马上就要帮你抢票了喵！")
 
     def get_time(self):
         return float(time.time() + self.config["time_offset"])
@@ -106,7 +106,7 @@ class BilibiliHyg:
             requests.exceptions.ReadTimeout,
             requests.exceptions.ConnectionError,
         ):
-            logger.error("网络连接超时")
+            logger.error("你的网络似乎有问题喵...")
             if self.config["proxy"]:
                 if self.ip == self.client.tps_current_ip(sign_type="hmacsha1"):
                     logger.info(
@@ -120,7 +120,7 @@ class BilibiliHyg:
         try:
             if response.status_code == 412:
                 logger.error(
-                    "可能被业务风控\n该种业务风控请及时暂停，否则可能会引起更大问题。"
+                    "你好像被叔叔风控了喵！code=412\n遇到这种情况请及时暂停喵，否则可能会引起更大问题喵。"
                 )
                 if self.config["proxy"]:
                     if self.ip == self.client.tps_current_ip(sign_type="hmacsha1"):
@@ -134,11 +134,11 @@ class BilibiliHyg:
                 else:
                     self.risk = True
                     logger.error(
-                        "你也可以尝试更换网络环境，如重启流量（飞行模式开关）重新拨号（重启光猫）等"
+                        "本喵推荐你更换网络环境喵！开发者说可以试试重启光猫，链接手机热点，或者换个地方连WiFi喵！"
                     )
-                    input("请确认排除问题后按三下回车继续")
-                    input("请再按两下回车继续")
-                    input("请再按一下回车继续")
+                    input("请一定要确认好问题已经解决了再按回车继续喵！")
+                    input("再按两下回车继续喵！")
+                    input("再按一下回车继续喵！")
                     return -1, 0
             screens = response.json()["data"]["screen_list"]
             # 找到 字段id为screen_id的screen
@@ -148,7 +148,7 @@ class BilibiliHyg:
                     screen = screens[i]
                     break
             if screen == {}:
-                logger.error("未找到场次")
+                logger.error("这个漫展好像没有这个场次喵！")
                 return -1, 0
             # 找到 字段id为sku_id的sku
             skus = screen["ticket_list"]
@@ -158,11 +158,11 @@ class BilibiliHyg:
                     sku = skus[i]
                     break
             if sku == {}:
-                logger.error("未找到票档")
+                logger.error("这个漫展好像没有这个票种喵！")
                 return -1, 0
             return int(sku["sale_flag_number"]), sku["clickable"]
         except:
-            logger.error("可能被风控")
+            logger.error("你好像被叔叔风控了喵！\n遇到这种情况请及时暂停喵，否则可能会引起更大问题喵。")
             return -1, 0
 
     def get_prepare(self):
@@ -235,7 +235,7 @@ class BilibiliHyg:
         if "phone" in self.config:
             phone = self.config["phone"]
         else:
-            phone = input("请输入手机号：")
+            phone = input("请告诉本喵你的联系方式喵：")
         self.captcha_data = {
             "code": code,
         }
@@ -251,7 +251,7 @@ class BilibiliHyg:
                         data=self.captcha_data,
         ).json()["data"]["is_valid"]
         if not success:
-            logger.error("验证失败")
+            logger.error("验证失败了喵！")
             if "phone" in self.config:
                 self.config.pop("phone")
             return False
@@ -288,23 +288,23 @@ class BilibiliHyg:
                 self.session.close()
                 return self.confirm_info(token)
         response = response.json()
-        logger.info("信息已确认")
+        logger.info("主人的信息我已经获取到了喵！")
         logger.debug(response)
         self.config["order_type"] = response["data"]["order_type"]
         if response["data"]["act"] is not None:
-            logger.info("检测到优惠活动")
+            logger.info("这个活动好像有优惠喵！")
             self.config["act_id"] = response["data"]["act"]["act_id"]
         return
 
     def get_token(self):
         info = self.get_prepare()
         if info == {}:
-            logger.warning("未开放购票或被风控，请检查配置问题，休息1s")
+            logger.warning("还不能买票呢喵，或者是被风控了喵！让本喵休息一下喵！")
             time.sleep(1)
             self.get_token()
         if info["token"]:
             logger.success(
-                "成功准备订单"
+                "订单准备就绪了喵！"
                 + "https://show.bilibili.com/platform/confirmOrder.html?token="
                 + info["token"]
             )
@@ -316,10 +316,10 @@ class BilibiliHyg:
             try:
                 self.confirm_info(info["token"])
             except:
-                logger.error("确认订单失败")
+                logger.error("确认订单失败了喵！")
             return info["token"]
         else:
-            logger.warning("触发风控。")
+            logger.warning("触发风控了喵！")
             self.sdk.add_breadcrumb(
                 category="gaia",
                 message="Gaia found",
@@ -339,7 +339,7 @@ class BilibiliHyg:
                     data=riskParam,
                 ).json()
             if risk["data"]["type"] == "geetest":
-                logger.warning("类型：验证码 ")
+                logger.warning("这好像是一个验证码喵！本喵正在帮你解决喵！")
                 gt, challenge, token = (
                     gtest["data"]["geetest"]["gt"],
                     gtest["data"]["geetest"]["challenge"],
@@ -347,25 +347,25 @@ class BilibiliHyg:
                 )
                 cap_data = self.verify(gt, challenge, token)
                 while cap_data == False:
-                    logger.error("验证失败，请重新验证")
+                    logger.error("验证码没有通过喵...极验无权为本喵授勋！")
                     return self.get_token()
-                logger.info("验证成功")
+                logger.info("本喵成功帮你通过了验证码喵！快夸夸我喵！")
             elif risk["data"]["type"] == "phone":
-                logger.warning("类型：手机验证")
+                logger.warning("这好像是一个手机验证喵！本喵正在帮你解决喵！")
                 token = risk["data"]["token"]
                 cap_data = self.phone_verify(token)
                 while cap_data == False:
-                    logger.error("验证失败，请重新验证")
+                    logger.error("验证码没有通过喵...叔叔无权为本喵授勋！")
                     return self.get_token()
             elif risk["data"]["type"] == "sms":
-                logger.warning("类型：短信验证")
-                logger.warning("暂不支持短信验证，请参考高级用户指南手动填入风控信息")
+                logger.warning("这好像是一个短信验证喵！本喵暂时无法帮你解决喵！")
+                logger.warning("暂不支持短信验证喵，开发者说请主人参考高级用户指南手动填入风控信息喵")
             elif risk["data"]["type"] == "biliword":
-                logger.warning("类型：文字验证码")
-                logger.warning("暂不支持文字验证码验证，请参考高级用户指南手动填入风控信息")
+                logger.warning("这好像是一个早划算同款的文字验证喵！本喵暂时无法帮你解决喵！")
+                logger.warning("暂不支持文字验证码验证喵，开发者说请参考高级用户指南手动填入风控信息喵")
             else:
-                logger.error("未知风控类型")
-                logger.warning("暂不支持该验证，请参考高级用户指南手动填入风控信息")
+                logger.error("喵？！这是什么验证码喵？！")
+                logger.warning("暂不支持该验证喵，开发者请参考高级用户指南手动填入风控信息喵")
             self.sdk.add_breadcrumb(
                 category="gaia",
                 message="Gaia passed",
@@ -425,7 +425,7 @@ class BilibiliHyg:
             requests.exceptions.ReadTimeout,
             requests.exceptions.ConnectionError,
         ):
-            logger.error("网络连接超时")
+            logger.error("网络连接超时了喵！")
             if self.config["proxy"]:
                 if self.ip == self.client.tps_current_ip(sign_type="hmacsha1"):
                     logger.info(
@@ -437,7 +437,7 @@ class BilibiliHyg:
             return self.create_order()
         if response.status_code == 412:
             logger.error(
-                "可能被业务风控\n该种业务风控请及时暂停，否则可能会引起更大问题。"
+                "可能被业务风控了喵\n该种业务风控请及时暂停，否则可能会引起更大问题喵。"
             )
             logger.info(response.text)
             if self.config["proxy"]:
@@ -451,7 +451,7 @@ class BilibiliHyg:
                 return self.create_order()
             else:
                 self.risk = True
-                logger.error("暂停60s")
+                logger.error("暂停60s喵")
                 time.sleep(60)
                 return {}
         return response.json()
@@ -487,16 +487,16 @@ class BilibiliHyg:
                 message=f'Success, orderid:{response["data"]["order_id"]}, payurl:https://pay.bilibili.com/payplatform-h5/pccashier.html?params="{urllib.parse.quote(json.dumps(response["data"]["payParam"], ensure_ascii=False))}',
                 level="info",
             )
-            logger.success("成功购票")
+            logger.success("入场券GET☆DAZE！")
             order_id = response["data"]["order_id"]
             pay_url = response["data"]["payParam"]["code_url"]
             response["data"]["payParam"].pop("code_url")
             response["data"]["payParam"].pop("expire_time")
             response["data"]["payParam"].pop("pay_type")
             response["data"]["payParam"].pop("use_huabei")
-            logger.info("订单号：" + order_id)
+            logger.info("叔叔告诉了本喵你的订单号：" + order_id)
             self.order_id = order_id
-            logger.info("请在微信/支付宝/QQ中扫描以下二维码，完成支付")
+            logger.info("请主人打开微信/支付宝/QQ中扫描以下二维码，完成支付喵！")
             logger.info("二维码内容：" + pay_url)
             qr = qrcode.QRCode()
             qr.add_data(pay_url)
@@ -510,10 +510,10 @@ class BilibiliHyg:
                 )
                 + " 完成支付"
             )
-            logger.info("请手动完成支付")
+            logger.info("请手动完成支付喵！")
             return True
         else:
-            logger.error("购票失败")
+            logger.error("购票失败了喵...")
             return False
 
     def order_status(self, order_id):
@@ -533,14 +533,14 @@ class BilibiliHyg:
         if response["data"]["status"] == 1:
             return True
         elif response["data"]["status"] == 2:
-            logger.success("订单支付成功，祝您游玩愉快！")
+            logger.success("订单支付成功，本喵祝您游玩愉快喵！")
             return False
         elif response["data"]["status"] == 4:
-            logger.warning("订单已取消")
+            logger.warning("订单已取消了喵")
             return False
         else:
             logger.warning(
-                "当前状态未知: "
+                "喵？！这好像是一个未知的状态喵: "
                 + response["data"]["status_name"]
                 + response["data"]["sub_status_name"]
             )
@@ -554,34 +554,34 @@ class BilibiliHyg:
             "biliCSRF": self.headers["Cookie"][self.headers["Cookie"].index("bili_jct") + 9 : self.headers["Cookie"].index("bili_jct") + 41]
         }).json()
         if response["status"] == True:
-            logger.success("已退出登录")
+            logger.success("已退出登录喵，本喵已经把你忘记了喵！")
         else:
-            logger.error("退出登录失败")
+            logger.error("退出登录失败了喵")
 
     def try_create_order(self):
         result = self.create_order()
         if result == {}:
             return False
         if result["errno"] == 100009:
-            logger.warning("无票")
+            logger.warning("票好像被别人买了喵！")
             self.waited = False
         elif result["errno"] == 100017:
-            logger.warning("票种不可售")
+            logger.warning("你选的票种还不能购买喵")
             self.waited = False
         elif result["errno"] == 3:
-            logger.warning("慢一点（强制5秒）")
+            logger.warning("本喵好像触发了叔叔的请慢一点限制喵...（强制5秒）")
             if not self.waited:
-                logger.info("等待4.88秒")
+                logger.info("正好，让我休息4.88秒喵！")
                 time.sleep(4.88)
                 self.waited = True
         elif result["errno"] == 100001:
-            logger.warning("小电视速率限制")
+            logger.warning("该死的小电视喵！")
         elif result["errno"] == 100041:
-            logger.warning("不是，哥们，你token呢？")
+            logger.warning("喵？！本喵没找到你的token喵！")
         elif result["errno"] == 100016:
-            logger.error("项目不可售")
+            logger.error("这个漫展还不能购买喵！")
         elif result["errno"] == 0:
-            logger.success("成功尝试下单！正在检测是否为假票")
+            logger.success("下单成功了喵！正在检测是否为假票喵！")
             pay_token = result["data"]["token"]
             orderid = None
             if "orderId" in result["data"]:
@@ -593,33 +593,33 @@ class BilibiliHyg:
                     url = "https://www.pushplus.plus/send"
                     response = requests.post(url, json={
                         "token": self.config["pushplus"],
-                        "title": "BHYG通知",
-                        "content": f"抢票成功，等待支付，订单号{self.order_id}",
+                        "title": "抢票喵通知喵",
+                        "content": f"主人！抢票成功了喵，快打开B站去支付吧喵，订单号是{self.order_id}喵！",
                     }).json()
                     if response["code"] == 200:
-                        logger.success(f"已发送通知，流水号 {response['data']}")
+                        logger.success(f"本喵已经告诉了pushplus你已经抢到票了喵！pushplus告诉了本喵一串代码： {response['data']}")
                     else:
-                        logger.error(f"通知发送失败，返回信息 {response}")
+                        logger.error(f"pushplus没有接受我们的通知喵... {response}")
                 if "hunter" in self.config:
                     return True
-                logger.info("订单未支付，正在等待")
+                logger.info("订单未支付喵，正在等待主人支付喵！")
                 while self.order_status(self.order_id):
                     time.sleep(1)
                 self.sdk.capture_message("Exit by in-app exit")
                 return True
             else:
-                logger.error("假票，继续抢票")
+                logger.error("喵？！怎么是张假票喵！继续下单喵！")
         elif result["errno"] == 100051:
             self.token = self.get_token()
         elif result["errno"] == 100079 or result["errno"] == 100048:
             logger.info(result["msg"])
-            logger.success("已经抢到了啊喂！")
+            logger.success("主人都已经抢到票了喵，还需要本喵干什么喵！")
             self.sdk.capture_message("Exit by in-app exit")
             return True
         elif result["errno"] == 219:
-            logger.info("库存不足")
+            logger.info("这个漫展的票库存不足了喵！")
         else:
-            logger.error("未知错误:" + str(result))
+            logger.error("本喵发现了一个未知错误喵:" + str(result))
         return False
 
     @staticmethod

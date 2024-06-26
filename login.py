@@ -64,7 +64,7 @@ def qr_login(session, headers):
     qr.print_ascii(invert=True)
     img = qr.make_image()
     img.show()
-    logger.info("请使用Bilibili手机客户端扫描二维码")
+    logger.info("请使用Bilibili手机客户端扫描二维码喵")
     while True:
         time.sleep(1)
         url = (
@@ -75,7 +75,7 @@ def qr_login(session, headers):
         # read as utf-8
         check = req.json()["data"]
         if check["code"] == 0:
-            logger.success("登录成功")
+            logger.success("登录成功了喵")
             cookies = requests.utils.dict_from_cookiejar(session.cookies)
             break
         elif check["code"] == 86101:
@@ -103,10 +103,10 @@ def verify_code_login(session, headers):
     challenge = captcha["data"]["geetest"]["challenge"]
     token = captcha["data"]["token"]
     tel = prompt([inquirer.Text("tel", message="请输入手机号", validate=lambda _, x: len(x) == 11)])["tel"]
-    logger.info("请稍后，正在执行自动验证...")
+    logger.info("本喵正在帮你通过验证码喵！")
     cap_data = _verify(gt, challenge, token)
     while cap_data == False:
-        logger.error("验证失败，请重新验证")
+        logger.error("验证失败了喵...极验无权为本喵授勋喵！")
         captcha = session.post(
             "https://passport.bilibili.com/x/passport-login/captcha",
             headers=headers,
@@ -115,7 +115,7 @@ def verify_code_login(session, headers):
         challenge = captcha["data"]["geetest"]["challenge"]
         token = captcha["data"]["token"]
         cap_data = _verify(gt, challenge, token)
-    logger.success("验证完成")
+    logger.success("本喵帮你通过了验证码喵！")
     data = {
         "cid": "86",
         "tel": tel,
@@ -134,10 +134,10 @@ def verify_code_login(session, headers):
         logger.error(f"{send['code']}: {send['message']}")
         return verify_code_login(session, headers)
     else:
-        logger.success("验证码发送成功")
+        logger.success("短信验证码发送成功了喵")
         send_token = send["data"]["captcha_key"]
     while True:
-        code = prompt([inquirer.Text("code", message="请输入验证码", validate=lambda _, x: len(x) == 6)])["code"]
+        code = prompt([inquirer.Text("code", message="请告诉本喵你收到的验证码喵", validate=lambda _, x: len(x) == 6)])["code"]
         # https://passport.bilibili.com/x/passport-login/web/login/sms
         data = {"cid": "86", "tel": tel, "captcha_key": send_token, "code": code}
         login = session.post(
@@ -148,12 +148,12 @@ def verify_code_login(session, headers):
         if login["code"] != 0:
             logger.error(f"{login['code']}: {login['message']}")
         else:
-            logger.success("登录成功")
+            logger.success("登录成功了喵")
             cookies = requests.utils.dict_from_cookiejar(session.cookies)
             return cookie(cookies)
 
 def verify_code_login_app(session, headers):
-    logger.warning("该方法尚在测试中")
+    logger.warning("该方法尚在测试中喵")
     import uuid
     def buvid():
         import hashlib
@@ -172,7 +172,7 @@ def verify_code_login_app(session, headers):
     # gt = captcha["data"]["geetest"]["gt"]
     # challenge = captcha["data"]["geetest"]["challenge"]
     # token = captcha["data"]["token"]
-    tel = prompt([inquirer.Text("tel", message="请输入手机号", validate=lambda _, x: len(x) == 11)])["tel"]
+    tel = prompt([inquirer.Text("tel", message="请告诉本喵你的手机号喵", validate=lambda _, x: len(x) == 11)])["tel"]
     # logger.info("请稍后，正在执行自动验证...")
     # cap_data = _verify(gt, challenge, token)
     # while cap_data == False:
@@ -185,7 +185,7 @@ def verify_code_login_app(session, headers):
     #     challenge = captcha["data"]["geetest"]["challenge"]
     #     token = captcha["data"]["token"]
     #     cap_data = _verify(gt, challenge, token)
-    logger.success("验证完成")
+    logger.success("验证完成喵")
     session_id = uuid.uuid4().hex.upper()
     buvid = buvid()
     data = {
@@ -213,10 +213,10 @@ def verify_code_login_app(session, headers):
         logger.error(f"{send['code']}: {send['message']}")
         return verify_code_login_app(session, headers)
     else:
-        logger.success("验证码发送成功")
+        logger.success("验证码发送成功了喵")
         send_token = send["data"]["captcha_key"]
     while True:
-        code = prompt([inquirer.Text("code", message="请输入验证码", validate=lambda _, x: len(x) == 6)])["code"]
+        code = prompt([inquirer.Text("code", message="请输入验证码喵", validate=lambda _, x: len(x) == 6)])["code"]
         # https://passport.bilibili.com/x/passport-login/login/sms
         data = {"cid": 86, "tel": int(tel), "captcha_key": send_token, "code": int(code), "login_session_id": session_id}
         login = session.post(
@@ -227,7 +227,7 @@ def verify_code_login_app(session, headers):
         if login["code"] != 0:
             logger.error(f"{login['code']}: {login['message']}")
         else:
-            logger.success("登录成功")
+            logger.success("登录成功了喵")
             cookies = requests.utils.dict_from_cookiejar(session.cookies)
             return cookie(cookies)
 
@@ -235,15 +235,15 @@ def password_login(session, headers):
     from Crypto.Cipher import PKCS1_v1_5
     from Crypto.PublicKey import RSA
 
-    username = prompt([inquirer.Text("username", message="请输入用户名")])["username"]
-    password = prompt([inquirer.Password("password", message="请输入密码")])["password"]
+    username = prompt([inquirer.Text("username", message="请告诉我你的用户名喵")])["username"]
+    password = prompt([inquirer.Password("password", message="请输入密码喵，本喵会闭上眼睛的喵")])["password"]
     captcha = session.get(
         "https://passport.bilibili.com/x/passport-login/captcha", headers=headers
     ).json()
     gt = captcha["data"]["geetest"]["gt"]
     challenge = captcha["data"]["geetest"]["challenge"]
     token = captcha["data"]["token"]
-    logger.info("请稍后，正在执行自动验证...")
+    logger.info("本喵正在为你通过验证码喵！")
     cap_data = _verify(gt, challenge, token)
     while cap_data == False:
         captcha = session.get(
@@ -253,9 +253,9 @@ def password_login(session, headers):
         gt = captcha["data"]["geetest"]["gt"]
         challenge = captcha["data"]["geetest"]["challenge"]
         token = captcha["data"]["token"]
-        logger.error("验证失败，请重新验证")
+        logger.error("验证码没过...极验无权为本喵授勋喵！")
         cap_data = _verify(gt, challenge, token)
-    logger.success("验证完成")
+    logger.success("验证完成了喵")
     key = session.get(
         "https://passport.bilibili.com/x/passport-login/web/key", headers=headers
     ).json()["data"]
@@ -284,7 +284,7 @@ def password_login(session, headers):
         return password_login(session, headers)
     else:
         if login["data"]["status"] == 2 or login["data"]["status"] == 1:
-            logger.warning("需要二次验证")
+            logger.warning("需要二次验证喵")
             # extract tmp_code request_id from login["data"]["url"]
             tmp_token = login["data"]["url"].split("tmp_token=")[1][:32]
             try:
@@ -302,9 +302,9 @@ def password_login(session, headers):
                 headers=headers,
             ).json()
             if info["data"]["account_info"]["bind_tel"]:
-                logger.info("已绑定手机号")
+                logger.info("这是主人账号绑定的手机号喵")
                 tel = info["data"]["account_info"]["hide_tel"]
-                logger.info("即将给该手机号发送验证码: " + tel)
+                logger.info("即将给该手机号发送验证码喵: " + tel)
             captcha = session.post(
                 "https://passport.bilibili.com/x/safecenter/captcha/pre",
                 headers=headers,
@@ -312,10 +312,10 @@ def password_login(session, headers):
             gt = captcha["data"]["gee_gt"]
             challenge = captcha["data"]["gee_challenge"]
             token = captcha["data"]["recaptcha_token"]
-            logger.info("请稍后，正在执行自动验证...")
+            logger.info("本喵正在为你解决验证码喵")
             cap_data = _verify(gt, challenge, token)
             while cap_data == False:
-                logger.error("验证失败，请重新验证")
+                logger.error("极验无权为本喵授勋喵！")
                 captcha = session.post(
                     "https://passport.bilibili.com/x/safecenter/captcha/pre",
                     headers=headers,
@@ -324,7 +324,7 @@ def password_login(session, headers):
                 challenge = captcha["data"]["gee_challenge"]
                 token = captcha["data"]["recaptcha_token"]
                 cap_data = _verify(gt, challenge, token)
-            logger.success("验证完成")
+            logger.success("验证完成了喵")
             data = {
                 "recaptcha_token": token,
                 "gee_challenge": cap_data["challenge"],
@@ -343,10 +343,10 @@ def password_login(session, headers):
                 logger.error(f"{send['code']}: {send['message']}")
                 return password_login(session, headers)
             else:
-                logger.success("验证码发送成功")
+                logger.success("验证码发送成功了喵")
                 send_token = send["data"]["captcha_key"]
             while True:
-                code = prompt([inquirer.Text("code", message="请输入验证码", validate=lambda _, x: len(x) == 6)])["code"]
+                code = prompt([inquirer.Text("code", message="请输入验证码喵", validate=lambda _, x: len(x) == 6)])["code"]
                 data = {
                     "type": "loginTelCheck",
                     "tmp_code": tmp_token,
@@ -362,7 +362,7 @@ def password_login(session, headers):
                 if send["code"] != 0:
                     logger.error(f"{send['code']}: {send['message']}")
                 else:
-                    logger.success("登录成功")
+                    logger.success("登录成功了喵")
                     code = send["data"]["code"]
                     data = {"source": "risk", "code": code}
                     session.post(
@@ -372,12 +372,12 @@ def password_login(session, headers):
                     ).json()
                     cookies = requests.utils.dict_from_cookiejar(session.cookies)
                     return cookie(cookies)
-        logger.success("登录成功")
+        logger.success("登录成功了喵")
         cookies = requests.utils.dict_from_cookiejar(session.cookies)
         return cookie(cookies)
 
 def sns_login(session, headers):
-    method = prompt([inquirer.List("method", message="请选择SNS登录方式", choices=["微信", "QQ", "微博"], default="微信")])["method"]
+    method = prompt([inquirer.List("method", message="请选择SNS登录方式喵", choices=["微信", "QQ", "微博"], default="微信")])["method"]
     if method == "微信":
         sns = "wechat"
     elif method == "QQ":
@@ -385,7 +385,7 @@ def sns_login(session, headers):
     elif method == "微博":
         sns = "weibo"
     else:
-        logger.error("暂不支持此方式")
+        logger.error("暂不支持此方式喵")
         return sns_login(session, headers)
     # https://passport.bilibili.com/x/passport-login/web/sns/state/generate
     state = session.get(
@@ -405,9 +405,9 @@ def sns_login(session, headers):
         data=data,
     ).json()["data"]["url"]
     logger.info(url)
-    logger.info("请在浏览器中打开上面的链接并登录, 然后复制重定向的链接（即提示'校验失败，请重试~'的网址）")
+    logger.info("请在浏览器中打开上面的链接并登录, 然后复制重定向的链接喵（即提示'校验失败，请重试~'的网址）")
     # https://passport.bilibili.com/x/passport-login/web/sns/login
-    redirect = prompt([inquirer.Text("redirect", message="请输入重定向链接")])["redirect"]
+    redirect = prompt([inquirer.Text("redirect", message="请输入重定向链接喵")])["redirect"]
     # get params from redirect
     try:
         redirect = redirect.split("?")[1]
@@ -423,7 +423,7 @@ def sns_login(session, headers):
             "code": params["code"],
         }
     except Exception:
-        logger.error("链接错误，请重新登录")
+        logger.error("链接错误，请重新登录喵")
         return sns_login(session, headers)
     login = session.post(
         "https://passport.bilibili.com/x/passport-login/web/sns/login",
@@ -434,9 +434,9 @@ def sns_login(session, headers):
             logger.error(f"{login['code']}: {login['message']}")
     else:
         if not login["data"]["has_bind"]:
-            logger.error("未绑定SNS账号")
+            logger.error("未绑定SNS账号喵")
             return sns_login(session, headers)
-        logger.success("登录成功")
+        logger.success("登录成功了喵")
         cookies = requests.utils.dict_from_cookiejar(session.cookies)
         return cookie(cookies)
 

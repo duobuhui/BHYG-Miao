@@ -53,9 +53,9 @@ def load() -> dict:
         data = unpad(cipher.decrypt(cipher_text), AES.block_size).decode("utf-8")
         data = json.loads(data)
     except ValueError:
-        logger.error("数据错误，运行环境不符")
+        logger.error("有问题喵！本喵正在删除错误的数据文件喵！")
         if os.path.exists("share.json"):
-            logger.info("检测到分享文件，正在迁移")
+            logger.info("本喵好像找到了一个分享文件喵，正在恢复数据喵！")
             with open("share.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
                 save(data)
@@ -64,20 +64,20 @@ def load() -> dict:
         else:
             data = {}
             os.remove("data")
-        logger.info("已销毁原数据")
+        logger.info("原数据文件已删除喵！")
     return data
 
 def agree_terms():
     while True:
-        agree_prompt = input("欢迎使用BHYG软件，使用前请阅读EULA(https://github.com/biliticket/BHYG)。若您使用时遇到问题，请查阅biliticket文档(https://docs.bitf1a5h.eu.org/)\n特别提醒，根据EULA，严禁任何形式通过本软件盈利。若您同意本软件EULA，请键入：我已阅读并同意EULA，黄牛倒卖狗死妈\n")
+        agree_prompt = input("欢迎使用抢票喵程序喵，使用前请阅读EULA喵(https://github.com/biliticket/BHYG)。若主人使用时遇到问题，请查阅biliticket文档喵(https://docs.bitf1a5h.eu.org/)\n抢票喵魔改版项目主页(https://github.com/duobuhui/BHYG-Miao/)当前基于0.7.7版本，commits:e7a6aa2\n特别提醒，根据EULA，严禁任何形式通过本软件盈利喵。若您同意本软件EULA，请向本喵承诺：我已阅读并同意EULA，黄牛倒卖狗死妈\n")
         if "同意" in agree_prompt and "死妈" in agree_prompt and "黄牛" in agree_prompt and "不" not in agree_prompt:
             break
         else:
-            logger.error("输入不正确，请重试")
+            logger.error("你是不是黄牛派来的卧底喵！必须给本喵承诺喵！")
     with open("agree-terms", "w") as f:
         import machineid
         f.write(machineid.id())
-    logger.info("已同意EULA")
+    logger.info("已同意EULA喵")
 
 def init():
     logger.remove(handler_id=0)
@@ -153,15 +153,15 @@ def check_update(version):
             find = False
             for distribution in data["assets"]:
                 if distribution["name"] == name:
-                    logger.warning(f"发现新版本{data['tag_name']}，请前往 {distribution['browser_download_url']} 下载，大小：{distribution['size']/1024/1024:.2f}MB")
+                    logger.warning(f"发现原始项目新版本{data['tag_name']}了喵，如果你想体验最新程序，请前往 {distribution['browser_download_url']} 下载喵，大小：{distribution['size']/1024/1024:.2f}MB喵。或者请等待抢票喵作者同步更新喵。")
                     if data['body'] != "":
-                        logger.warning(f"更新说明：{data['body']}")
+                        logger.warning(f"这是原始项目的更新说明喵：{data['body']}")
                     find = True
                     break
             if not find:
-                logger.warning(f"发现新版本{data['tag_name']}，请前往{data['html_url']}查看")
+                logger.warning(f"发现原始项目新版本{data['tag_name']}了喵，请前往{data['html_url']}查看喵。或者请等待抢票喵作者同步更新喵。")
     except:
-        logger.warning("更新检查失败")
+        logger.warning("更新检查失败了喵，一定是哪里有问题喵！")
     
 
 class HygException(Exception):
@@ -171,7 +171,7 @@ class HygException(Exception):
 def load_config(): 
     go_utility = False
     if os.path.exists("config.json"):
-        logger.info("感谢您升级到最新版本！现在正在为您自动迁移...")
+        logger.info("感谢主人升级到最新版本了喵！现在正在为主人自动迁移旧版本数据喵...")
         if os.path.isdir("data"):
             import shutil
             shutil.rmtree("data")
@@ -179,9 +179,9 @@ def load_config():
             config = json.load(f)
             save(config)
         os.remove("config.json")
-        logger.info("迁移完成")
+        logger.info("迁移完成了喵")
     if os.path.exists("share.json"):
-        logger.info("检测到分享文件，正在导入")
+        logger.info("本喵好像找到了一个分享文件喵，正在恢复数据喵！")
         with open("share.json", "r", encoding="utf-8") as f:
             config = json.load(f)
             save(config)
@@ -193,7 +193,7 @@ def load_config():
         run_info = prompt([
             inquirer.List(
                 "run_info",
-                message="请选择运行设置",
+                message="请选择运行设置喵",
                 choices=["延续上次启动所有配置", "保留登录信息重新配置", "全新启动", "进入账户实用工具", "进入账户实用工具（重新登录）"],
                 default="延续上次启动所有配置"
             )]
@@ -243,13 +243,13 @@ def load_config():
     try:
         response = c.request('ntp.sjtu.edu.cn')
     except Exception:
-        logger.error("时间同步出现错误，将跳过时间检查")
+        logger.error("时间同步出现错误了喵，本喵将跳过时间检查喵")
         skip = True
     if skip == False:
         import time
         time_offset = response.offset
         if time_offset > 0.5:
-            logger.warning(f"当前时间偏移：{time_offset:.2f}秒，建议校准时间")
+            logger.warning(f"主人的系统时间有：{time_offset:.2f}秒的偏移喵，建议校准时间呢喵")
         config["time_offset"] = time_offset
     else:
         config["time_offset"] = 0
@@ -265,9 +265,9 @@ def load_config():
             )
             user = user.json()
             if user["data"]["isLogin"]:
-                logger.success("用户 " + user["data"]["uname"] + " 登录成功")
+                logger.success("主人 " + user["data"]["uname"] + " 登录成功了喵！")
                 if user["data"]["vipStatus"] == 1:
-                    logger.info(f"用户为大会员，距离到期还有{(user['data']['vipDueDate']/1000-time.time())/60/60/24:.2f}天")
+                    logger.info(f"主人居然是大会员喵，距离到期还有{(user['data']['vipDueDate']/1000-time.time())/60/60/24:.2f}天喵，好有钱喵！")
                 import machineid
                 sentry_sdk.set_user(
                     {
@@ -276,12 +276,12 @@ def load_config():
                     }
                 )
                 if "hunter" in config:
-                    logger.success("已启用猎手模式")
-                    logger.info(f"战绩：{config['hunter']}张")  
+                    logger.success("已启用猎手模式喵")
+                    logger.info(f"主人已经用本喵抢到了：{config['hunter']}张喵")  
                 save(config)         
                 break
             else:
-                logger.error("登录失败")
+                logger.error("登录失败了喵...")
                 use_login = False
                 config.pop("cookie")
                 save(config)
